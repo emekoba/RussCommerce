@@ -134,7 +134,7 @@ function mapDispatchToProps(dispatch) {
     getAllProducts: () =>
       dispatch({
         type: SagaCommands.FETCH_PRODUCTS,
-        limit: 10,
+        limit: 20,
       }),
 
     updateUserProgress: progress =>
