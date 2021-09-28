@@ -1,17 +1,67 @@
 import React, {useEffect} from 'react';
-import {Image, StyleSheet, Text, View} from 'react-native';
+import {AsyncStorage, Image, StyleSheet, View} from 'react-native';
 import {createAppContainer} from 'react-navigation';
 import {createBottomTabNavigator} from 'react-navigation-tabs';
 import Home from './main/Product/Product.list';
 import Cart from './main/Cart/Cart';
 import {cartActive, home} from '../resources/resources';
 import {connect} from 'react-redux';
-import {globalTheme, SagaCommands} from '../globals/globals';
+import {DispatchCommands, globalTheme, SagaCommands} from '../globals/globals';
 
-function Pages({unseenInCart, getAllProducts}) {
+function Pages({
+  getAllProducts,
+  productList,
+  productCategories,
+  cartData,
+  userData,
+  updateUserProgress,
+}) {
   const _theme = globalTheme['light'];
 
-  useEffect(() => getAllProducts(), []);
+  // useEffect(() => getAllProducts(), []);
+
+  useEffect(() => {
+    AsyncStorage.getItem('users-collection')
+      .then(users_collection => {
+        users_collection = JSON.parse(users_collection);
+
+        if (
+          users_collection[userData.id]['productList'] && // 👈 null and undefined check
+          Object.keys(users_collection[userData.id]['productList']).length ===
+            0 &&
+          Object.getPrototypeOf(
+            users_collection[userData.id]['productList'],
+          ) === Object.prototype
+        ) {
+          getAllProducts();
+        } else {
+          updateUserProgress(users_collection[userData.id]);
+        }
+      })
+      .catch(e => console.log('error', e));
+
+    return () => {
+      AsyncStorage.getItem('users-collection')
+        .then(users_collection => {
+          users_collection = JSON.parse(users_collection);
+
+          users_collection[userData.id] = {
+            ...users_collection[userData.id],
+            cart: cartData,
+            productList,
+            productCategories,
+          };
+
+          console.log(users_collection[userData.id]);
+
+          AsyncStorage.setItem(
+            'users-collection',
+            JSON.stringify(users_collection),
+          ).then(() => console.log('users-collection backed up'));
+        })
+        .catch(e => console.log('error', e));
+    };
+  }, []);
 
   const TabNavigator = createBottomTabNavigator(
     {
@@ -34,11 +84,11 @@ function Pages({unseenInCart, getAllProducts}) {
                 resizeMode="contain"
               />
 
-              {unseenInCart > 0 && (
+              {/* {cartData.unseen > 0 && (
                 <View style={_x(_theme).badge}>
                   <Text style={_x(_theme).badge_txt}>{unseenInCart}</Text>
                 </View>
-              )}
+              )} */}
             </View>
           ),
         }),
@@ -67,6 +117,10 @@ function Pages({unseenInCart, getAllProducts}) {
 function mapStateToProps(state) {
   return {
     unseenInCart: state.cart.unseen,
+    productList: state.productList,
+    cartData: state.cart,
+    productCategories: state.productCategories,
+    userData: state.user,
   };
 }
 
@@ -76,6 +130,12 @@ function mapDispatchToProps(dispatch) {
       dispatch({
         type: SagaCommands.FETCH_PRODUCTS,
         limit: 10,
+      }),
+
+    updateUserProgress: progress =>
+      dispatch({
+        type: DispatchCommands.UPDATE_PAST_USER_ACTIVITY,
+        payload: progress,
       }),
   };
 }

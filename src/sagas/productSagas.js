@@ -17,7 +17,11 @@ function* asyncGetAllProducts(action) {
   if (products != null) {
     // console.log('all products', products);
 
-    let categories = [...new Set(products.map(e => e.category))];
+    let categories = {};
+
+    products.map(e => {
+      categories[e.category] = false;
+    });
 
     yield put({type: DispatchCommands.STOP_LOADER});
 

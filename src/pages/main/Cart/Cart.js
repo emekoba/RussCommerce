@@ -1,19 +1,47 @@
-import React, {useEffect} from 'react';
-import {View, Text, StyleSheet, FlatList} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  Modal,
+  BackHandler,
+} from 'react-native';
 import {connect} from 'react-redux';
 import {
   DispatchCommands,
   globalTheme,
   ProductPostTypes,
 } from '../../../globals/globals';
+import ProductPage from '../Product/Product.page';
 import ProductPost from '../Product/Product.post';
 
 function CartList({cartItems, clearCartCount, productList, navigation}) {
   const _theme = globalTheme['light'];
 
+  const [productpreview, setproductpreview] = useState({
+    previewInfo: '',
+    isOpen: false,
+  });
+
   useEffect(() => {
+    BackHandler.addEventListener('hardwareBackPress', function () {
+      closeProductPreview();
+
+      return true;
+    });
     // clearCartCount();
   }, []);
+
+  function openProductPreview(previewInfo) {
+    // setproductpreview({...productpreview, previewInfo, isOpen: true});
+  }
+
+  function closeProductPreview() {
+    setproductpreview({...productpreview, isOpen: false});
+
+    console.log(productpreview.isOpen);
+  }
 
   return (
     <View style={_x(_theme).cart_list}>
@@ -31,14 +59,25 @@ function CartList({cartItems, clearCartCount, productList, navigation}) {
             name={productList[item].title}
             image={productList[item].image}
             description={productList[item].description}
-            navigation={navigation}
             inCart={productList[item]?.inCart}
             price={productList[item].price}
             rating={productList[item]?.rating?.rate}
+            onPress={openProductPreview}
           />
         )}
         contentContainerStyle={_x().main}
       />
+
+      {/* {productpreview.isOpen && ( */}
+      {/* <Modal
+        isVisible={productpreview.isOpen}
+        onBackButtonPress={closeProductPreview}
+        onBackdropPress={closeProductPreview}
+        useNativeDriver={true}
+        style={{margin: 0}}>
+        <ProductPage previewInfo={productpreview.previewInfo} />
+      </Modal> */}
+      {/* )} */}
     </View>
   );
 }

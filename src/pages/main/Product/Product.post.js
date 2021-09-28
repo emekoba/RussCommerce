@@ -22,33 +22,18 @@ function ProductPost({
   image,
   price,
   description,
-  navigation,
   inCart,
   rating,
   addToCart,
   type,
   removeFromCart,
+  onPress,
 }) {
   const _theme = globalTheme['light'];
 
-  function goToProductPage() {
-    const navigateAction = NavigationActions.navigate({
-      routeName: 'ProductPage',
-      params: {
-        name,
-        image,
-        description,
-        price,
-      },
-
-      // action: NavigationActions.navigate({ routeName: 'ProductPage' }),
-    });
-    navigation.dispatch(navigateAction);
-  }
-
   function toggleCart() {
-    if (!inCart) addToCart(id);
-    else removeFromCart(id);
+    if (!inCart) addToCart(id, type);
+    else removeFromCart(id, type);
   }
 
   return (
@@ -58,7 +43,9 @@ function ProductPost({
         {width: type === ProductPostTypes.CART ? '95%' : '45%'},
       ]}
       activeOpacity={0.9}
-      onPress={goToProductPage}>
+      onPress={() =>
+        onPress({id, name, image, price, description, inCart, rating})
+      }>
       <Image
         source={{uri: image}}
         style={{height: 100, marginTop: 20, margin: 10}}
@@ -108,11 +95,11 @@ function ProductPost({
 
 function mapDispatchToProps(dispatch) {
   return {
-    addToCart: id =>
-      dispatch({type: DispatchCommands.ADD_TO_CART, payload: id}),
+    addToCart: (id, type) =>
+      dispatch({type: DispatchCommands.ADD_TO_CART, payload: {id, type}}),
 
-    removeFromCart: id =>
-      dispatch({type: DispatchCommands.REMOVE_FROM_CART, payload: id}),
+    removeFromCart: (id, type) =>
+      dispatch({type: DispatchCommands.REMOVE_FROM_CART, payload: {id, type}}),
   };
 }
 

@@ -1,10 +1,30 @@
-import {DispatchCommands} from '../globals/globals';
+import {
+  AuthStates,
+  DispatchCommands,
+  ProductPostTypes,
+} from '../globals/globals';
 
 const globalState = {
+  authState: AuthStates.LOGIN,
+
   appName: 'russcommerce',
-  user: {id: '23232', name: 'Russell J Emekoba', password: 'asmodeus'},
+
+  userLoggedIn: true,
+
+  user: {id: 'BBUV4DYwsD1RAQeDCG6t'},
+
   cart: {unseen: 0, items: []},
+
   russell: [
+    // category: 'electronics',
+    // description:
+    //   'Easy upgrade for faster boot up, shutdown, application load and response (As compared to 5400 RPM SATA 2.5” hard drive; Based on published specifications and internal benchmarking tests using PCMark vantage scores) Boosts burst write performance, making it ideal for typical PC workloads The perfect balance of performance and reliability Read/write speeds of up to 535MB/s/450MB/s (Based on internal testing; Performance may vary depending upon drive capacity, host device, OS and application.)',
+    // id: 10,
+    // image: 'https://fakestoreapi.com/img/61U7T1koQqL._AC_SX679_.jpg',
+    // price: 109,
+    // rating: {count: 470, rate: 2.9},
+    // title: 'SanDisk SSD PLUS 1TB Internal SSD - SATA III 6 Gb/s',
+    // inCart: true,
     {
       category: "men's clothing",
       description:
@@ -108,18 +128,13 @@ const globalState = {
       title: 'SanDisk SSD PLUS 1TB Internal SSD - SATA III 6 Gb/s',
     },
   ],
+
   productList: {},
-  productCategories: [],
-  productPreview: {
-    category: 'electronics',
-    description:
-      'Easy upgrade for faster boot up, shutdown, application load and response (As compared to 5400 RPM SATA 2.5” hard drive; Based on published specifications and internal benchmarking tests using PCMark vantage scores) Boosts burst write performance, making it ideal for typical PC workloads The perfect balance of performance and reliability Read/write speeds of up to 535MB/s/450MB/s (Based on internal testing; Performance may vary depending upon drive capacity, host device, OS and application.)',
-    id: 10,
-    image: 'https://fakestoreapi.com/img/61U7T1koQqL._AC_SX679_.jpg',
-    price: 109,
-    rating: {count: 470, rate: 2.9},
-    title: 'SanDisk SSD PLUS 1TB Internal SSD - SATA III 6 Gb/s',
-  },
+
+  productCategories: {},
+
+  productPreview: {},
+
   loader: {
     isLoading: false,
   },
@@ -128,10 +143,26 @@ const globalState = {
 export default function reducer(state = globalState, {type, payload}) {
   switch (type) {
     case DispatchCommands.LOGIN:
-      return {...state, user: payload};
+      return {
+        ...state,
+        user: payload,
+        userLoggedIn: true,
+      };
 
     case DispatchCommands.START_LOADER:
       return {...state, loader: {...state.loader, isLoading: true}};
+
+    case DispatchCommands.CHANGE_AUTH_STATE:
+      return {...state, authState: payload};
+
+    case DispatchCommands.TOGGLE_AUTH_STATE:
+      return {
+        ...state,
+        authState:
+          state.authState === AuthStates.LOGIN
+            ? AuthStates.REGISTER
+            : AuthStates.LOGIN,
+      };
 
     case DispatchCommands.STOP_LOADER:
       return {...state, loader: {...state.loader, isLoading: false}};
@@ -154,44 +185,71 @@ export default function reducer(state = globalState, {type, payload}) {
       return {...state, productList: payload};
 
     case DispatchCommands.ADD_TO_CART:
-      state.productList[payload]['inCart'] = true;
-
-      // console.log(state.productList[payload]);
-
       return {
         ...state,
+        productList: {
+          ...state.productList,
+          [`${payload.id}`]: {
+            ...state.productList[payload.id],
+            inCart: true,
+          },
+        },
         cart: {
           ...state.cart,
           unseen: state.cart.unseen + 1,
-          items: [...state.cart.items, payload],
+          items: [...state.cart.items, payload.id],
         },
+        ...(payload.type === ProductPostTypes.PREVIEW
+          ? {productPreview: {...state.productPreview, inCart: true}}
+          : {}),
       };
 
     case DispatchCommands.REMOVE_FROM_CART:
-      state.productList[payload]['inCart'] = false;
-
-      // console.log(state.productList[payload]);
-
       return {
         ...state,
+        productList: {
+          ...state.productList,
+          [`${payload.id}`]: {
+            ...state.productList[payload.id],
+            inCart: false,
+          },
+        },
         cart: {
           ...state.cart,
-          items: state.cart.items.filter(e => e !== payload),
+          items: state.cart.items.filter(e => e !== payload.id),
         },
+        ...(payload.type === ProductPostTypes.PREVIEW
+          ? {productPreview: {...state.productPreview, inCart: false}}
+          : {}),
       };
 
     case DispatchCommands.GET_SINGLE_PRODUCT:
-      let single_product = state.productList.filter(e => e.id === payload)[0];
-
       return {
         ...state,
-        productPreview: single_product,
+        productPreview: state.productList[payload],
       };
 
     case DispatchCommands.CLEAR_UNSEEN_CART_COUNT:
       return {
         ...state,
         cart: {...state.cart, unseen: 0},
+      };
+
+    case DispatchCommands.TOGGLE_ACTIVE_CATEGORY:
+      return {
+        ...state,
+        productCategories: {
+          ...state.productCategories,
+          [`${payload}`]: !state.productCategories[payload],
+        },
+      };
+
+    case DispatchCommands.UPDATE_PAST_USER_ACTIVITY:
+      return {
+        ...state,
+        productCategories: payload.productCategories,
+        cart: payload.cart,
+        productList: payload.productList,
       };
 
     default:

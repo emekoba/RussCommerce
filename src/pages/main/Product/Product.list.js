@@ -7,6 +7,7 @@ import {
   Image,
   RefreshControl,
   AsyncStorage,
+  Keyboard,
 } from 'react-native';
 import {connect} from 'react-redux';
 import AppLoader from '../../../components/AppLoader';
@@ -19,23 +20,24 @@ import {
 import ProductPost from './Product.post';
 import ProductListFilter from './Product.listFilter';
 import Modal from 'react-native-modal';
+import ProductPage from './Product.page';
+import {Appearance} from 'react-native-appearance';
 
-function ProductList({
-  getAllProducts,
-  productList,
-  navigation,
-  getMoreProducts,
-  cartData,
-}) {
+function ProductList({productList, categories, getMoreProducts}) {
   const [listlimit, setlistlimit] = useState(10);
 
-  const [filter, setfilter] = useState({
+  const [filter, setfilter] = useState(false);
+
+  const [refreshing, setrefreshing] = useState(false);
+
+  const [activeCategories, setactiveCategories] = useState([]);
+
+  const [productpreview, setproductpreview] = useState({
+    previewInfo: '',
     isOpen: false,
   });
 
-  const [firstload, setfirstload] = useState(false);
-
-  const [refreshing, setrefreshing] = useState(false);
+  const [themeState, setThemeState] = useState();
 
   const _theme = globalTheme['light'];
 
@@ -47,10 +49,23 @@ function ProductList({
   // });
 
   useEffect(() => {
-    setrefreshing(false);
-  }, [productList]);
+    const subscription = Appearance.addChangeListener(({colorScheme}) => {
+      setThemeState(colorScheme);
+    });
+    return () => subscription.remove();
+  }, []);
+
+  useEffect(() => setrefreshing(false), [productList]);
 
   useEffect(() => {
+    setactiveCategories(
+      Object.keys(categories).filter(e => categories[e] === true),
+    );
+  }, [categories]);
+
+  useEffect(() => {
+    Keyboard.dismiss();
+
     return () => {
       // _storeData = async () => {
       //   try {
@@ -64,15 +79,23 @@ function ProductList({
 
   function fetchMoreProducts() {
     setrefreshing(true);
-    getMoreProducts(limit);
+    getMoreProducts(listlimit);
   }
 
   function openProductFilter() {
-    setfilter({...filter, isOpen: true});
+    setfilter(true);
   }
 
   function closeProductFilter() {
-    setfilter({...filter, isOpen: false});
+    setfilter(false);
+  }
+
+  function openProductPreview(previewInfo) {
+    setproductpreview({...productpreview, previewInfo, isOpen: true});
+  }
+
+  function closeProductPreview() {
+    setproductpreview({...productpreview, isOpen: false});
   }
 
   return (
@@ -98,7 +121,7 @@ function ProductList({
               colors={['#9Bd35A', '#689F38']}
               refreshing={refreshing}
               onRefresh={() => {
-                setlimit(limit + 10);
+                setlistlimit(listlimit + 10);
                 fetchMoreProducts();
               }}
             />
@@ -107,19 +130,25 @@ function ProductList({
           data={Object.keys(productList)}
           keyExtractor={item => productList[item].id}
           renderItem={({item}) => {
-            return (
-              <ProductPost
-                type={ProductPostTypes.FEED}
-                id={productList[item].id}
-                name={productList[item].title}
-                image={productList[item].image}
-                description={productList[item].description}
-                navigation={navigation}
-                inCart={productList[item]?.inCart}
-                price={productList[item].price}
-                rating={productList[item].rating.rate}
-              />
-            );
+            if (
+              activeCategories.includes(productList[item].category) ||
+              activeCategories.length === 0
+            ) {
+              return (
+                <ProductPost
+                  type={ProductPostTypes.FEED}
+                  id={productList[item].id}
+                  name={productList[item].title}
+                  image={productList[item].image}
+                  description={productList[item].description}
+                  inCart={productList[item]?.inCart}
+                  category={productList[item].category}
+                  price={productList[item].price}
+                  rating={productList[item].rating.rate}
+                  onPress={openProductPreview}
+                />
+              );
+            }
           }}
           contentContainerStyle={_x().main}
         />
@@ -128,15 +157,28 @@ function ProductList({
       )}
 
       <Modal
-        isVisible={filter.isOpen}
+        isVisible={productpreview.isOpen}
+        onBackButtonPress={closeProductPreview}
+        onBackdropPress={closeProductPreview}
+        useNativeDriver={true}
+        style={{margin: 0}}>
+        <ProductPage previewInfo={productpreview.previewInfo} />
+      </Modal>
+
+      <Modal
+        isVisible={filter}
         animationType="slide"
-        animationIn="slideInRight"
-        animationOut="slideOutRight"
-        backdropOpacity={0}
+        animationIn="fadeIn"
+        animationOut="fadeOut"
+        backdropOpacity={0.2}
         onBackButtonPress={closeProductFilter}
         onBackdropPress={closeProductFilter}
         useNativeDriver={true}
-        style={{margin: 0, alignItems: 'flex-end'}}>
+        style={{
+          margin: 0,
+          alignItems: 'flex-end',
+          justifyContent: 'flex-start',
+        }}>
         <ProductListFilter />
       </Modal>
 
@@ -149,6 +191,7 @@ function mapStateToProps(state) {
   return {
     productList: state.productList,
     cartData: state.cartData,
+    categories: state.productCategories,
   };
 }
 
