@@ -36,8 +36,10 @@ function Onboarding({
   const _theme = globalTheme['light'];
 
   useEffect(() => {
-    if (userLoggedIn) {
+    if (userLoggedIn === true) {
       navigation.navigate('Pages');
+    } else {
+      navigation.navigate('Onboarding');
     }
   }, [userLoggedIn]);
 

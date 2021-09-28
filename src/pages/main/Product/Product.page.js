@@ -29,6 +29,7 @@ function ProductPage({previewInfo, addToCart, removeFromCart}) {
       <Text style={[_x(_theme).text, _x(_theme).name]}>{previewInfo.name}</Text>
 
       <View
+      
         style={{
           borderWidth: 2,
           borderColor: _theme.secondary,

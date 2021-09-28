@@ -152,6 +152,12 @@ export default function reducer(state = globalState, {type, payload}) {
         userLoggedIn: true,
       };
 
+    case DispatchCommands.LOGOUT:
+      return {
+        ...state,
+        userLoggedIn: false,
+      };
+
     case DispatchCommands.START_LOADER:
       return {...state, loader: {...state.loader, isLoading: true}};
 

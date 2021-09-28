@@ -20,46 +20,51 @@ function Pages({
 
   // useEffect(() => getAllProducts(), []);
 
-  useEffect(() => {
-    AsyncStorage.getItem('users-collection')
-      .then(users_collection => {
-        users_collection = JSON.parse(users_collection);
+  function isObject(obj) {
+    return (
+      obj && // 👈 null and undefined check
+      Object.keys(obj).length === 0 &&
+      Object.getPrototypeOf(obj) === Object.prototype
+    );
+  }
 
-        if (
-          users_collection[userData.id]['productList'] && // 👈 null and undefined check
-          Object.keys(users_collection[userData.id]['productList']).length ===
-            0 &&
-          Object.getPrototypeOf(
-            users_collection[userData.id]['productList'],
-          ) === Object.prototype
-        ) {
-          getAllProducts();
-        } else {
-          updateUserProgress(users_collection[userData.id]);
-        }
-      })
-      .catch(e => console.log('error', e));
+  useEffect(() => {
+    // AsyncStorage.getItem('users-collection')
+    //   .then(users_collection => {
+    //     users_collection = JSON.parse(users_collection);
+
+    //     if (isObject(users_collection[userData.id])) {
+    //       getAllProducts();
+    //     } else {
+    //       updateUserProgress(users_collection[userData.id]);
+    //     }
+    //   })
+    //   .catch(e => console.log('error', e));
+
+    getAllProducts();
 
     return () => {
-      AsyncStorage.getItem('users-collection')
-        .then(users_collection => {
-          users_collection = JSON.parse(users_collection);
+      if (userData) {
+        AsyncStorage.getItem('users-collection')
+          .then(users_collection => {
+            users_collection = JSON.parse(users_collection);
 
-          users_collection[userData.id] = {
-            ...users_collection[userData.id],
-            cart: cartData,
-            productList,
-            productCategories,
-          };
+            users_collection[userData.id] = {
+              ...users_collection[userData.id],
+              cart: cartData,
+              productList,
+              productCategories,
+            };
 
-          console.log(users_collection[userData.id]);
+            console.log(users_collection[userData.id]);
 
-          AsyncStorage.setItem(
-            'users-collection',
-            JSON.stringify(users_collection),
-          ).then(() => console.log('users-collection backed up'));
-        })
-        .catch(e => console.log('error', e));
+            AsyncStorage.setItem(
+              'users-collection',
+              JSON.stringify(users_collection),
+            ).then(() => console.log('users-collection backed up'));
+          })
+          .catch(e => console.log('error', e));
+      }
     };
   }, []);
 

@@ -10,7 +10,7 @@ import {
 //? ASYNCS.............................................................................................................................................
 
 function* asyncLogin(action) {
-  yield put({type: DispatchCommands.START_LOADER});
+  // yield put({type: DispatchCommands.START_LOADER});
 
   let userInfo = {};
 
@@ -39,8 +39,8 @@ function* asyncLogin(action) {
 
         Alert.alert('Error', 'User Does Not Exist. Please Register', [
           {
-            text: 'Cancel',
-            style: 'cancel',
+            text: 'Ok',
+            style: 'Ok',
           },
         ]);
       }
@@ -49,17 +49,22 @@ function* asyncLogin(action) {
       console.log('error', e);
     });
 
-  yield put({type: DispatchCommands.STOP_LOADER});
+  // yield put({type: DispatchCommands.STOP_LOADER});
+
+  // stopLoader();
 
   if (userExists) {
-    yield triggerLoginDispatch(userInfo);
+    yield put({
+      type: DispatchCommands.LOGIN,
+      payload: userInfo,
+    });
   } else {
     console.log('incorrect email or password');
 
     Alert.alert('Error', 'Incorrect Email or Password', [
       {
-        text: 'Cancel',
-        style: 'cancel',
+        text: 'Ok',
+        style: 'Ok',
       },
     ]);
   }
@@ -67,6 +72,10 @@ function* asyncLogin(action) {
 
 function* triggerLoginDispatch(userInfo) {
   yield put({type: DispatchCommands.LOGIN, payload: userInfo});
+}
+
+function* stopLoader() {
+  yield put({type: DispatchCommands.STOP_LOADER});
 }
 
 function* asyncRegister(action) {

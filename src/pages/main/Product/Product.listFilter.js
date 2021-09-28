@@ -1,15 +1,23 @@
 // import {CheckBox, CheckBoxBase} from '@react-native-community/checkbox';
 import React from 'react';
-import {View, Text, StyleSheet, ScrollView, Switch} from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Switch,
+  TouchableOpacity,
+} from 'react-native';
 import {connect} from 'react-redux';
 import {DispatchCommands, globalTheme} from '../../../globals/globals';
+import Icon from 'react-native-vector-icons/SimpleLineIcons';
 
-function ProductListFilter({categories, toggleActiveCategory}) {
+function ProductListFilter({categories, toggleActiveCategory, logout}) {
   const _theme = globalTheme['light'];
 
   return (
     <View style={_x(_theme).product_list_filter}>
-      <ScrollView>
+      <ScrollView contentContainerStyle={{flex: 1}}>
         {Object.keys(categories).map(key => (
           <View style={_x(_theme).block} key={key}>
             <Switch
@@ -26,6 +34,12 @@ function ProductListFilter({categories, toggleActiveCategory}) {
           </View>
         ))}
       </ScrollView>
+
+      <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
+        <TouchableOpacity style={{width: 40, height: 40}} onPress={logout}>
+          <Icon name="logout" size={30} color={_theme.primary} />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -42,6 +56,10 @@ function mapDispatchToProps(dispatch) {
       dispatch({
         type: DispatchCommands.TOGGLE_ACTIVE_CATEGORY,
         payload: category,
+      }),
+    logout: () =>
+      dispatch({
+        type: DispatchCommands.LOGOUT,
       }),
   };
 }

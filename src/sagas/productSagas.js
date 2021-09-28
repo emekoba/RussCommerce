@@ -15,7 +15,7 @@ function* asyncGetAllProducts(action) {
     .then(json => json);
 
   if (products != null) {
-    // console.log('all products', products);
+    console.log('all products', products);
 
     let categories = {};
 
