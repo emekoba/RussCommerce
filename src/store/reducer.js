@@ -2,12 +2,15 @@ import {
   AuthStates,
   DispatchCommands,
   ProductPostTypes,
+  ThemeStates,
 } from '../globals/globals';
 
 const globalState = {
   authState: AuthStates.LOGIN,
 
   appName: 'russcommerce',
+
+  themeState: ThemeStates.LIGHT,
 
   userLoggedIn: true,
 

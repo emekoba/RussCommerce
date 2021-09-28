@@ -19,9 +19,9 @@ function ProductPage({previewInfo, addToCart, removeFromCart}) {
   const _theme = globalTheme['light'];
 
   function toggleCart() {
-    if (!previewInfo.inCart)
-      addToCart(previewInfo?.id, ProductPostTypes.PREVIEW);
-    else removeFromCart(previewInfo?.id, ProductPostTypes.PREVIEW);
+    // if (!previewInfo.inCart)
+    //   addToCart(previewInfo?.id, ProductPostTypes.PREVIEW);
+    // else removeFromCart(previewInfo?.id, ProductPostTypes.PREVIEW);
   }
 
   return (

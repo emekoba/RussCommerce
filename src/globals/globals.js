@@ -13,6 +13,7 @@ export const DispatchCommands = {
   TOGGLE_AUTH_STATE: 'TOGGLE_AUTH_STATE',
   TOGGLE_ACTIVE_CATEGORY: 'TOGGLE_ACTIVE_CATEGORY',
   UPDATE_PAST_USER_ACTIVITY: 'UPDATE_PAST_USER_ACTIVITY',
+  TOGGLE_THEME_STATE: 'TOGGLE_THEME_STATE',
 };
 
 export const SagaCommands = {
@@ -31,6 +32,11 @@ export const ProductPostTypes = {
 export const AuthStates = {
   LOGIN: 'LOGIN',
   REGISTER: 'REGISTER',
+};
+
+export const ThemeStates = {
+  LIGHT: 'light',
+  DARK: 'dark',
 };
 
 export const globalTheme = {

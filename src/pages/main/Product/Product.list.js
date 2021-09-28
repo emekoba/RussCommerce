@@ -23,7 +23,7 @@ import Modal from 'react-native-modal';
 import ProductPage from './Product.page';
 import {Appearance} from 'react-native-appearance';
 
-function ProductList({productList, categories, getMoreProducts}) {
+function ProductList({productList, categories, getMoreProducts, themeState}) {
   const [listlimit, setlistlimit] = useState(10);
 
   const [filter, setfilter] = useState(false);
@@ -37,22 +37,13 @@ function ProductList({productList, categories, getMoreProducts}) {
     isOpen: false,
   });
 
-  const [themeState, setThemeState] = useState();
-
-  const _theme = globalTheme['light'];
-
-  // const [_theme, _settheme] = useState(globalTheme['light']);
-
-  // const subscription = Appearance.addChangeListener(({colorScheme}) => {
-  //   _settheme(globalTheme[colorScheme]);
-  //   console.log(_theme);
-  // });
+  const _theme = globalTheme[themeState];
 
   useEffect(() => {
-    const subscription = Appearance.addChangeListener(({colorScheme}) => {
-      setThemeState(colorScheme);
-    });
-    return () => subscription.remove();
+    // const subscription = Appearance.addChangeListener(({colorScheme}) => {
+    //   setThemeState(colorScheme);
+    // });
+    // return () => subscription.remove();
   }, []);
 
   useEffect(() => setrefreshing(false), [productList]);
@@ -192,6 +183,7 @@ function mapStateToProps(state) {
     productList: state.productList,
     cartData: state.cartData,
     categories: state.productCategories,
+    themeState: state.themeState,
   };
 }
 
